@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" serverName="klyuchi">
+  <component name="PublishConfigData" autoUpload="On explicit save action" serverName="klyuchi" autoUploadExternalChanges="true">
     <serverData>
       <paths name="afishka31">
         <serverdata>
@@ -49,6 +49,10 @@
           <mappings>
             <mapping deploy="/" local="$PROJECT_DIR$" web="/" />
           </mappings>
+          <excludedPaths>
+            <excludedPath path="/bitrix" />
+            <excludedPath path="/upload" />
+          </excludedPaths>
         </serverdata>
       </paths>
       <paths name="livam.pro">
@@ -150,5 +154,6 @@
         </serverdata>
       </paths>
     </serverData>
+    <option name="myAutoUpload" value="ON_EXPLICIT_SAVE" />
   </component>
 </project>

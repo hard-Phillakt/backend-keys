@@ -76,13 +76,90 @@ class Methods
     }
 
     // Метод создает новое сообщение для заявки от лица "Заказчика"
-    static public function addElementDiscussionCustomer($countFiles = null, $userId = null, $createLink = false, $startLiveLinks = null, $endLiveLinks = null, $status = null, $idRequest = null)
+    static public function addElementDiscussionCustomer($countFiles = null, $userId = null, $status = null, $idRequest = null)
     {
         if (CModule::IncludeModule("iblock")) {
 
-
             // Для менеджера (Переводчика)
-            if ($startLiveLinks) {
+            $i = 0;
+            while ($i < $countFiles) {
+
+                $arFiles = [
+                    "name" => $_FILES['upfiles']['name'][$i],
+                    "size" => $_FILES['upfiles']['size'][$i],
+                    "tmp_name" => $_FILES['upfiles']['tmp_name'][$i],
+                    "type" => $_FILES['upfiles']['type'][$i],
+                ];
+
+                $el = new CIBlockElement;
+
+                if ($fid = CFile::SaveFile($arFiles, "uploads_work_files")) {
+
+                    $PROP = [];
+
+                    $arrPropIdsFilesDiscussion[] = $fid;
+                    $jsonEncodeDiscussion = json_encode($arrPropIdsFilesDiscussion);
+
+                    $arrPropIdGroupUser = [];
+                    $idGroupUser = json_decode($_POST['idGroupUser'], true);
+                    for($iIdGroupUser = 0; $iIdGroupUser < count($idGroupUser); $iIdGroupUser++){
+                        $arrPropIdGroupUser[] = (int) $idGroupUser[$iIdGroupUser];
+                    }
+
+                    $PROP[10] = $userId; // ID пользователя
+                    $PROP[13] = $idRequest; // ID заявки
+                    $PROP[14] = getdate()[0]; // ID очереди сообщения к заявке (временная метка)
+                    $PROP[12] = $status; // Статус к сообщению
+                    $PROP[11] = $jsonEncodeDiscussion; // ID очереди сообщения к заявке (временная метка)
+                    $PROP[19] = json_encode($arrPropIdGroupUser); // Группа пользователя
+
+                    // Данные для инфоблока "Обсуждение" id - 2
+                    $arLoadDiscussionArray = [
+                        "MODIFIED_BY" => $userId,
+                        "IBLOCK_SECTION_ID" => false,
+                        "IBLOCK_ID" => 2,
+                        "PROPERTY_VALUES" => $PROP,
+                        "NAME" => $_POST['title'],
+                        "ACTIVE" => "Y",
+                    ];
+
+                    if (empty(self::$discussionId)) {
+                        $discussionId = $el->Add($arLoadDiscussionArray);
+                        self::$discussionId = $discussionId;
+                    } else {
+                        if (!empty(self::$discussionId)) {
+                            $discussionId = $el->Update(self::$discussionId, $arLoadDiscussionArray);
+                        }
+                    }
+
+                    // Выводим id обсуждения
+                    echo "el id: {$discussionId}";
+
+                } else {
+                    // Выводим ошибку
+                    echo "error: {$el->LAST_ERROR}";
+                }
+
+                $i++;
+            }
+
+        }
+    }
+
+    // Метод создает новое сообщение для заявки от лица "Переводчика"
+    static public function addElementDiscussionTranslator($countFiles = null, $userId = null, $status = null, $idRequest = null, $createLink = false, $startLiveLinks = null, $endLiveLinks = null)
+    {
+
+        if (CModule::IncludeModule("iblock")) {
+
+
+            // Если нужно сформировать ссылку для скачивания и время доступа к ней
+            if (isset($createLink) && !empty($createLink) && !empty($startLiveLinks) && !empty($endLiveLinks)) {
+
+                self::updateElementRequestAddLinks($countFiles, $userId, $idRequest, $startLiveLinks, $endLiveLinks);
+
+            } else {
+                // Для менеджера (Переводчика)
                 $i = 0;
                 while ($i < $countFiles) {
 
@@ -97,38 +174,23 @@ class Methods
 
                     if ($fid = CFile::SaveFile($arFiles, "uploads_work_files")) {
 
-//                        $arrPropIdsFilesRequest[] = $fid;
-//                        $jsonE = json_encode($arrPropIdsFilesRequest);
-//
                         $PROP = [];
-//                        $PROP[1] = $userId;
-//                        $PROP[2] =  $_POST['fio'];
-//                        $PROP[3] = $_POST['phone'];
-//                        $PROP[4] = trim($_POST['comment']);
-//                        $PROP[5] = 6; // "В работе"
-//                        $PROP[6] = $jsonE;
-
-                        // Если сообщение без сформированной ссылки
 
                         $arrPropIdsFilesDiscussion[] = $fid;
                         $jsonEncodeDiscussion = json_encode($arrPropIdsFilesDiscussion);
 
+                        $arrPropIdGroupUser = [];
+                        $idGroupUser = json_decode($_POST['idGroupUser'], true);
+                        for($iIdGroupUser = 0; $iIdGroupUser < count($idGroupUser); $iIdGroupUser++){
+                            $arrPropIdGroupUser[] = (int) $idGroupUser[$iIdGroupUser];
+                        }
+
                         $PROP[10] = $userId; // ID пользователя
-                        $PROP[13] = $_POST['id-request']; // ID заявки
+                        $PROP[13] = $idRequest; // ID заявки
                         $PROP[14] = getdate()[0]; // ID очереди сообщения к заявке (временная метка)
-                        $PROP[12] = $_POST['status']; // Статус к сообщению
+                        $PROP[12] = $status; // Статус к сообщению
                         $PROP[11] = $jsonEncodeDiscussion; // ID очереди сообщения к заявке (временная метка)
-
-
-                        // Данные для инфоблока "Заявки" id - 1
-//                        $arLoadProductArray = [
-//                            "MODIFIED_BY"    => $userId,
-//                            "IBLOCK_SECTION_ID" => false,
-//                            "IBLOCK_ID"      => 1,
-//                            "PROPERTY_VALUES"=> $PROP,
-//                            "NAME"           => $_POST['title'],
-//                            "ACTIVE"         => "Y",
-//                        ];
+                        $PROP[19] = json_encode($arrPropIdGroupUser); // Группа пользователя
 
                         // Данные для инфоблока "Обсуждение" id - 2
                         $arLoadDiscussionArray = [
@@ -136,119 +198,33 @@ class Methods
                             "IBLOCK_SECTION_ID" => false,
                             "IBLOCK_ID" => 2,
                             "PROPERTY_VALUES" => $PROP,
-                            "NAME" => $_POST['comment'],
+                            "NAME" => $_POST['title'],
                             "ACTIVE" => "Y",
                         ];
-
-//                        dump($arLoadDiscussionArray);die;
 
                         if (empty(self::$discussionId)) {
                             $discussionId = $el->Add($arLoadDiscussionArray);
                             self::$discussionId = $discussionId;
-
                         } else {
                             if (!empty(self::$discussionId)) {
                                 $discussionId = $el->Update(self::$discussionId, $arLoadDiscussionArray);
                             }
                         }
-
                         // Выводим id обсуждения
-                        echo "id: " . $discussionId . "<br>";
+                        echo "el id: {$discussionId}";
 
                     } else {
                         // Выводим ошибку
-                        echo "Error: " . $el->LAST_ERROR;
-                    }
-
-                    $i++;
-                }
-            } else {
-                $i = 0;
-                while ($i < $countFiles) {
-
-                    $arFiles = [
-                        "name" => $_FILES['upfiles']['name'][$i],
-                        "size" => $_FILES['upfiles']['size'][$i],
-                        "tmp_name" => $_FILES['upfiles']['tmp_name'][$i],
-                        "type" => $_FILES['upfiles']['type'][$i],
-                    ];
-
-                    $el = new CIBlockElement;
-
-                    if ($fid = CFile::SaveFile($arFiles, "uploads_work_files")) {
-
-//                        $arrPropIdsFilesRequest[] = $fid;
-//                        $jsonE = json_encode($arrPropIdsFilesRequest);
-//
-                        $PROP = [];
-//                        $PROP[1] = $userId;
-//                        $PROP[2] =  $_POST['fio'];
-//                        $PROP[3] = $_POST['phone'];
-//                        $PROP[4] = trim($_POST['comment']);
-//                        $PROP[5] = 6; // "В работе"
-//                        $PROP[6] = $jsonE;
-
-                        // Если сообщение без сформированной ссылки
-                        if (!$createLink) {
-                            $arrPropIdsFilesDiscussion[] = $fid;
-                            $jsonEncodeDiscussion = json_encode($arrPropIdsFilesDiscussion);
-
-                            $PROP[10] = $userId; // ID пользователя
-                            $PROP[13] = $_POST['id-request']; // ID заявки
-                            $PROP[14] = getdate()[0]; // ID очереди сообщения к заявке (временная метка)
-                            $PROP[12] = $_POST['status']; // Статус к сообщению
-                            $PROP[11] = $jsonEncodeDiscussion; // ID очереди сообщения к заявке (временная метка)
-
-
-                            // Данные для инфоблока "Заявки" id - 1
-//                        $arLoadProductArray = [
-//                            "MODIFIED_BY"    => $userId,
-//                            "IBLOCK_SECTION_ID" => false,
-//                            "IBLOCK_ID"      => 1,
-//                            "PROPERTY_VALUES"=> $PROP,
-//                            "NAME"           => $_POST['title'],
-//                            "ACTIVE"         => "Y",
-//                        ];
-
-                            // Данные для инфоблока "Обсуждение" id - 2
-                            $arLoadDiscussionArray = [
-                                "MODIFIED_BY" => $userId,
-                                "IBLOCK_SECTION_ID" => false,
-                                "IBLOCK_ID" => 2,
-                                "PROPERTY_VALUES" => $PROP,
-                                "NAME" => $_POST['comment'],
-                                "ACTIVE" => "Y",
-                            ];
-
-//                        dump($arLoadDiscussionArray);die;
-
-                            if ($i < 1) {
-                                $prodId = $el->Add($arLoadDiscussionArray);
-                                self::$prodId = $prodId;
-
-                            } else {
-                                if (!empty(self::$prodId)) {
-                                    $prodId = $el->Update(self::$prodId, $arLoadDiscussionArray);
-                                }
-                            }
-
-                            // Выводим успех
-                            echo "id: " . $prodId . "<br>";
-                        }
-
-
-                    } else {
-                        // Выводим ошибку
-                        echo "Error: " . $el->LAST_ERROR;
+                        echo "error: {$el->LAST_ERROR}";
                     }
 
                     $i++;
                 }
             }
-
         }
     }
 
+    // Метод создает новое сообщение для заявки от лица "Переводчика" и вносит данные для готового перевода
     static public function updateElementRequestAddLinks($countFiles = null, $userId = null, $idRequest = null, $startLiveLinks = null, $endLiveLinks = null)
     {
 
@@ -271,7 +247,7 @@ class Methods
 
         }
 
-        dump($propElementArr);
+        // dump($propElementArr);
 
         if (!empty($propElementArr)) {
 
@@ -331,78 +307,6 @@ class Methods
                 $i++;
             }
 
-        }
-    }
-
-    // Метод создает новое сообщение для заявки от лица "Переводчика"
-    static public function addElementDiscussionTranslator($countFiles = null, $userId = null, $status = null, $idRequest = null, $createLink = false, $startLiveLinks = null, $endLiveLinks = null)
-    {
-
-        if (CModule::IncludeModule("iblock")) {
-
-
-            // Если нужно сформировать ссылку для скачивания и время доступа к ней
-            if (isset($createLink) && !empty($createLink) && !empty($startLiveLinks) && !empty($endLiveLinks)) {
-
-                self::updateElementRequestAddLinks($countFiles, $userId, $idRequest, $startLiveLinks, $endLiveLinks);
-
-            } else {
-                // Для менеджера (Переводчика)
-                $i = 0;
-                while ($i < $countFiles) {
-
-                    $arFiles = [
-                        "name" => $_FILES['upfiles']['name'][$i],
-                        "size" => $_FILES['upfiles']['size'][$i],
-                        "tmp_name" => $_FILES['upfiles']['tmp_name'][$i],
-                        "type" => $_FILES['upfiles']['type'][$i],
-                    ];
-
-                    $el = new CIBlockElement;
-
-                    if ($fid = CFile::SaveFile($arFiles, "uploads_work_files")) {
-
-                        $PROP = [];
-
-                        $arrPropIdsFilesDiscussion[] = $fid;
-                        $jsonEncodeDiscussion = json_encode($arrPropIdsFilesDiscussion);
-
-                        $PROP[10] = $userId; // ID пользователя
-                        $PROP[13] = $idRequest; // ID заявки
-                        $PROP[14] = getdate()[0]; // ID очереди сообщения к заявке (временная метка)
-                        $PROP[12] = $status; // Статус к сообщению
-                        $PROP[11] = $jsonEncodeDiscussion; // ID очереди сообщения к заявке (временная метка)
-
-                        // Данные для инфоблока "Обсуждение" id - 2
-                        $arLoadDiscussionArray = [
-                            "MODIFIED_BY" => $userId,
-                            "IBLOCK_SECTION_ID" => false,
-                            "IBLOCK_ID" => 2,
-                            "PROPERTY_VALUES" => $PROP,
-                            "NAME" => $_POST['title'],
-                            "ACTIVE" => "Y",
-                        ];
-
-                        if (empty(self::$discussionId)) {
-                            $discussionId = $el->Add($arLoadDiscussionArray);
-                            self::$discussionId = $discussionId;
-                        } else {
-                            if (!empty(self::$discussionId)) {
-                                $discussionId = $el->Update(self::$discussionId, $arLoadDiscussionArray);
-                            }
-                        }
-
-                        // Выводим id обсуждения
-                        //echo "id: " . $discussionId . "<br>";
-
-                    } else {
-                        // Выводим ошибку
-                        //echo "Error: " . $el->LAST_ERROR;
-                    }
-
-                    $i++;
-                }
-            }
         }
     }
 }
