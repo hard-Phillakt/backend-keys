@@ -51,16 +51,17 @@ foreach ($discussionsArr as $key) {
 
 ksort($discussionsArrSort, SORT_NUMERIC);
 
-//dump($discussionsArrSort);
+// dump($discussionsArrSort);
 
+// dump($arResult);
 ?>
 
 <div class="col-lg-12">
-    <h1><?= $arResult['NAME']; ?></h1>
+    <h1><?= $arResult['NAME']; ?> №<?= $arResult['ID']; ?></h1>
     <ul>
-        <li>Создана: <?= $arResult['TIMESTAMP_X']; ?></li>
-        <li>Статус: <?= $arResult['PROPERTIES']['STATUS']['VALUE']; ?></li>
-        <li>Ответственный: <?= $arResult['PROPERTIES']['CUSTOMER_FIO']['VALUE'] . " | " . $arResult['TIMESTAMP_X']; ?></li>
+<!--        <li>Создана: --><?//= $arResult['TIMESTAMP_X']; ?><!--</li>-->
+<!--        <li>Статус: --><?//= $arResult['PROPERTIES']['STATUS']['VALUE']; ?><!--</li>-->
+<!--        <li>Ответственный: --><?//= $arResult['PROPERTIES']['CUSTOMER_FIO']['VALUE'] . " | " . $arResult['TIMESTAMP_X']; ?><!--</li>-->
     </ul>
 </div>
 
@@ -79,10 +80,14 @@ ksort($discussionsArrSort, SORT_NUMERIC);
 
         <!--    Информация по заявке    -->
         <div class="panel panel-primary">
-            <div class="panel-heading"><h3 class="panel-title">Panel title</h3></div>
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    <?= $arResult['NAME']; ?> | <?= $arResult['TIMESTAMP_X']; ?>
+                </h3>
+            </div>
             <div class="panel-body">
                 <div class="row">
-                    <div class="col-lg-8">
+                    <div class="col-lg-7">
                         <div class="col-lg-1">
                             <div>
                                 <img src="<?= DEFAULT_TEMPLATE_PATH . '/img/user/user-customer.png' ?>" alt="">
@@ -90,17 +95,71 @@ ksort($discussionsArrSort, SORT_NUMERIC);
                         </div>
                         <div class="col-lg-10">
                             <ul>
-                                <li>ФИО: Семенов Николай Михайлович</li>
-                                <li>Телефон: +7 910 111-22-33</li>
-                                <li>Комментарий: Нужно сделать срочно</li>
+                                <li>ФИО: <?= $arResult['PROPERTIES']['CUSTOMER_FIO']['VALUE']; ?></li>
+                                <li>Телефон: <?= $arResult['PROPERTIES']['CUSTOMER_PHONE']['VALUE']; ?></li>
+                                <li>Комментарий: <?= $arResult['PROPERTIES']['CUSTOMER_COMMENT']['VALUE']; ?></li>
                             </ul>
+
                             <ul>
-                                <li>Доверенность.pdf</li>
-                                <li>Доверенность.pdf</li>
+                                <?php
+
+                                $attachedFilesTranslate = json_decode($arResult['PROPERTIES']['ATTACHED_FILES_FOR_TRANSLATE']['VALUE'], true);
+
+                                foreach ($attachedFilesTranslate as $key):
+
+                                    $urlFile = CFile::GetPath($key);
+                                    $dataFile = CFile::GetByID($key);
+                                    $arrDataFile = $dataFile->Fetch();
+                                    //dump($arrDataFile);
+                                    ?>
+                                    <li>
+                                        <a href="<?= $urlFile; ?>"><?= $arrDataFile['ORIGINAL_NAME']; ?></a>
+
+                                    </li>
+                                <?php endforeach; ?>
                             </ul>
+
                         </div>
                     </div>
 
+
+                    <div class="col-lg-5">
+                        <div>
+                            <strong>Статус:</strong> <?= $arResult['PROPERTIES']['STATUS']['VALUE']; ?>
+                        </div>
+                        <div>
+                            <?php
+
+                            // данные по пользователю
+                            $idUserTranslator = $arResult['PROPERTIES']['TRANSLATOR_ID']['VALUE'];;
+                            $currentUserTranslator = $USER::GetByID($idUserTranslator);
+                            $arCurrentUser = $currentUserTranslator->Fetch(); // данные о пользователе
+
+                            ?>
+
+                            <p><strong>Переводчик:</strong> <?= $arCurrentUser['NAME']; ?></p>
+                            <p><strong>Время действия ссылки:</strong>
+                                <br>
+                                <?php
+
+                                $strToArrLinkLife = json_decode($arResult['PROPERTIES']['LINK_LIFE_DATE']['VALUE'], true);
+
+                                $milStart = $strToArrLinkLife[0];
+                                $secondsStart = $milStart / 1000;
+                                echo 'Начало: ' . date("d/m/Y h:i:s", $milStart) . '<br>';
+
+
+                                $milEnd = $strToArrLinkLife[1];
+                                $secondsEnd= $milEnd / 1000;
+                                echo 'Конец: ' . date("d/m/Y h:i:s", $milEnd) . '<br>';
+
+                                ?>
+                            </p>
+                        </div>
+                        <div>
+                            <strong>Ссылка:</strong> <a href="/transfer-view/?hash=<?= $arResult['CODE']; ?>">перейти на страницу перевода</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -111,7 +170,7 @@ ksort($discussionsArrSort, SORT_NUMERIC);
         // id 5 группа мфц
         // id 6 группа ключи
 
-         dump($discussionsArrSort);
+        // dump($discussionsArrSort);
 
         foreach ($discussionsArrSort as $key): ?>
 
@@ -144,10 +203,54 @@ ksort($discussionsArrSort, SORT_NUMERIC);
                             : <?= $arCurrentUser['EMAIL']; ?>
                             | <?= $key['TIMESTAMP_X']; ?></h3>
                     </div>
-                    <div class="panel-body">Panel content</div>
+                    <div class="panel-body">
+
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <h4><?= $key['NAME']; ?></h4>
+
+                                <p><?= $key['PROP']['COMMENT']['VALUE']['TEXT']; ?></p>
+
+                                <div>
+                                    <ul>
+                                        <?php
+
+                                        $attachedFilesTranslate = json_decode($key['PROP']['ATTACHED_FILES']['VALUE'], true);
+
+                                        foreach ($attachedFilesTranslate as $key):
+
+                                            $urlFile = CFile::GetPath($key);
+                                            $dataFile = CFile::GetByID($key);
+                                            $arrDataFile = $dataFile->Fetch();
+                                            //dump($arrDataFile);
+
+                                            ?>
+                                            <li>
+                                                <a href="<?= $urlFile; ?>"><?= $arrDataFile['ORIGINAL_NAME']; ?></a>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <?php if(!empty($key['PROP']['STATUS']['VALUE'])): ?>
+
+                                <div class="col-lg-6">
+                                    <div>
+                                        <strong>Статус:</strong> <?= $key['PROP']['STATUS']['VALUE_ENUM']; ?>
+                                    </div>
+
+                                    <div>
+                                        <strong>Ссылка:</strong> <a href="/transfer-view/?hash=<?= $arResult['CODE']; ?>">перейти на страницу перевода</a>
+                                    </div>
+                                </div>
+
+                            <?php endif; ?>
+
+                        </div>
+
+                    </div>
                 </div>
-
-
 
                 <?php else: ?>
 
@@ -173,7 +276,46 @@ ksort($discussionsArrSort, SORT_NUMERIC);
                             : <?= $arCurrentUser['EMAIL']; ?>
                             | <?= $key['TIMESTAMP_X']; ?></h3>
                     </div>
-                    <div class="panel-body">Panel content</div>
+                    <div class="panel-body">
+
+                        <div class="row">
+                            <div class="col-lg-6">
+
+                                <h4><?= $key['NAME']; ?></h4>
+
+                                <p>
+                                    <?= $key['PROP']['COMMENT']['VALUE']['TEXT']; ?>
+                                </p>
+
+                                <div>
+                                    <ul>
+                                        <?php
+
+                                        $attachedFilesTranslate = json_decode($key['PROP']['ATTACHED_FILES']['VALUE'], true);
+
+                                        foreach ($attachedFilesTranslate as $keyFile):
+
+                                            $urlFile = CFile::GetPath($keyFile);
+                                            $dataFile = CFile::GetByID($keyFile);
+                                            $arrDataFile = $dataFile->Fetch();
+                                            //dump($arrDataFile);
+                                            ?>
+                                            <li>
+                                                <a href="<?= $urlFile; ?>"><?= $arrDataFile['ORIGINAL_NAME']; ?></a>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div>
+                                    <strong>Статус:</strong> <?= $key['PROP']['STATUS']['VALUE_ENUM']; ?>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
 
 
@@ -191,6 +333,7 @@ ksort($discussionsArrSort, SORT_NUMERIC);
     $rsUser = $USER::GetByID($USER->GetID());
     $arUser = $rsUser->Fetch(); // данные о пользователе
     $arGroups = $USER->GetUserGroupArray(); // id групп пользователя
+
     ?>
 
     <div class="well">
@@ -265,23 +408,8 @@ ksort($discussionsArrSort, SORT_NUMERIC);
                     </div>
 
                     <div class="form-group">
-                        <label for="exampleTextarea">Ответить</label>
-                        <textarea class="form-control" name="comment" rows="5" id="exampleTextarea">Переводчик text</textarea>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <div class="form-group">
-                                <label for="startLiveLinks">Начало активности ссылки</label>
-                                <input type="text" name="startLiveLinks" class="form-control datepicker" id="startLiveLinks" >
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="form-group">
-                                <label for="endLiveLinks">Конец активности ссылки</label>
-                                <input type="text" name="endLiveLinks" class="form-control datepicker" id="endLiveLinks" >
-                            </div>
-                        </div>
+                        <label for="exampleTextarea">Комментарий</label>
+                        <textarea class="form-control" name="comment" rows="5" id="exampleTextarea">Комментарий text</textarea>
                     </div>
 
                     <div class="form-group">
@@ -292,14 +420,41 @@ ksort($discussionsArrSort, SORT_NUMERIC);
 
                     <div class="checkbox">
                         <label>
-                            <input type="checkbox" name="status" value="13"> Перевод выполнен
-                        </label>
-                    </div>
-                    <div class="checkbox">
-                        <label>
                             <input type="checkbox" name="createLink"> сформировать ссылку
                         </label>
                     </div>
+
+
+                    <div class="form-group__translate-create-link">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="startLiveLinks">Начало активности ссылки</label>
+                                    <input type="text" name="startLiveLinks" class="form-control datepicker" id="startLiveLinks" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="endLiveLinks">Конец активности ссылки</label>
+                                    <input type="text" name="endLiveLinks" class="form-control datepicker" id="endLiveLinks" autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="textTranslate">Текст с готовым переводом</label>
+                            <textarea class="form-control" name="textTranslate" rows="5" id="textTranslate">Текст с готовым переводом text</textarea>
+                        </div>
+
+                        <div class="checkbox">
+                            <label>
+                                <!-- Перевод выполнен -->
+                                <input type="hidden" name="status" value="">
+                            </label>
+                        </div>
+                    </div>
+
+
 
                     <input type="hidden" name="idGroupUser" value='<?= json_encode($arGroups); ?>'>
                     <input type="hidden" name="idRequest" value="<?= $_GET['ELEMENT_ID'] ?>">

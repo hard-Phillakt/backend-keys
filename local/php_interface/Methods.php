@@ -48,6 +48,7 @@ class Methods
                             "IBLOCK_ID" => 1,
                             "PROPERTY_VALUES" => $PROP,
                             "NAME" => $_POST['title'],
+                            "CODE" => md5('klyuchi-hash' . $userId . strtotime("now")),
                             "ACTIVE" => "Y",
                         ];
 
@@ -75,12 +76,13 @@ class Methods
         }
     }
 
+
     // Метод создает новое сообщение для заявки от лица "Заказчика"
     static public function addElementDiscussionCustomer($countFiles = null, $userId = null, $status = null, $idRequest = null)
     {
         if (CModule::IncludeModule("iblock")) {
 
-            // Для менеджера (Переводчика)
+            // Для менеджера (Заказчика)
             $i = 0;
             while ($i < $countFiles) {
 
@@ -93,6 +95,7 @@ class Methods
 
                 $el = new CIBlockElement;
 
+                //##################### Если есть прикрепленные файлы для перевода
                 if ($fid = CFile::SaveFile($arFiles, "uploads_work_files")) {
 
                     $PROP = [];
@@ -112,6 +115,7 @@ class Methods
                     $PROP[12] = $status; // Статус к сообщению
                     $PROP[11] = $jsonEncodeDiscussion; // ID очереди сообщения к заявке (временная метка)
                     $PROP[19] = json_encode($arrPropIdGroupUser); // Группа пользователя
+                    $PROP[20] = trim($_POST['comment']); // Коментарий
 
                     // Данные для инфоблока "Обсуждение" id - 2
                     $arLoadDiscussionArray = [
@@ -126,25 +130,142 @@ class Methods
                     if (empty(self::$discussionId)) {
                         $discussionId = $el->Add($arLoadDiscussionArray);
                         self::$discussionId = $discussionId;
+
+                        // обновляем статус заявки после создания сообщения
+                        self::updateElementRequestStatus($status, $idRequest);
                     } else {
                         if (!empty(self::$discussionId)) {
                             $discussionId = $el->Update(self::$discussionId, $arLoadDiscussionArray);
+
+                            // обновляем статус заявки после создания сообщения
+                            self::updateElementRequestStatus($status, $idRequest);
                         }
                     }
 
                     // Выводим id обсуждения
-                    echo "el id: {$discussionId}";
+                     echo "discussion id: {$discussionId}";
 
-                } else {
-                    // Выводим ошибку
-                    echo "error: {$el->LAST_ERROR}";
+                }
+
+                //################# Если нету прикрепленных файлов для перевода
+                else {
+
+                    $PROP = [];
+
+                    $arrPropIdGroupUser = [];
+                    $idGroupUser = json_decode($_POST['idGroupUser'], true);
+                    for($iIdGroupUser = 0; $iIdGroupUser < count($idGroupUser); $iIdGroupUser++){
+                        $arrPropIdGroupUser[] = (int) $idGroupUser[$iIdGroupUser];
+                    }
+
+                    $PROP[10] = $userId; // ID пользователя
+                    $PROP[13] = $idRequest; // ID заявки
+                    $PROP[14] = getdate()[0]; // ID очереди сообщения к заявке (временная метка)
+                    $PROP[12] = $status; // Статус к сообщению
+                    //$PROP[11] = $jsonEncodeDiscussion; // id Прикрепленных файлов
+                    $PROP[19] = json_encode($arrPropIdGroupUser); // Группа пользователя
+                    $PROP[20] = trim($_POST['comment']); // Коментарий
+
+                    // Данные для инфоблока "Обсуждение" id - 2
+                    $arLoadDiscussionArray = [
+                        "MODIFIED_BY" => $userId,
+                        "IBLOCK_SECTION_ID" => false,
+                        "IBLOCK_ID" => 2,
+                        "PROPERTY_VALUES" => $PROP,
+                        "NAME" => $_POST['title'],
+                        "ACTIVE" => "Y",
+                    ];
+
+                    $discussionId = $el->Add($arLoadDiscussionArray);
+
+                    // обновляем статус заявки после создания сообщения
+                    self::updateElementRequestStatus($status, $idRequest);
+
+                    // Выводим id обсуждения
+                    echo "discussion id: {$discussionId}";
                 }
 
                 $i++;
             }
-
         }
     }
+
+    // Метод обновляет статус заявки от лица "Заказчика" при создании нового сообщения
+    static public function updateElementRequestStatus($status = null, $idRequest = null)
+    {
+        $el = new CIBlockElement;
+
+        $propElementArr = [];
+
+        $_elElement = CIBlockElement::GetList(["SORT" => "ASC"], ['ID' => $idRequest], false, false, []);
+
+        while ($_elElementObj = $_elElement->GetNextElement()) {
+            $elElementFields = $_elElementObj->GetFields();
+
+            $propElementArr['ELEMENT'] = $elElementFields;
+
+            $_elElementProp = CIBlockElement::GetProperty(1, $idRequest, [], []);
+
+            while ($elElementPropFields = $_elElementProp->Fetch()) {
+                $propElementArr['PROPERTIES'][$elElementPropFields['CODE']] = $elElementPropFields;
+            }
+        }
+
+        // dump($propElementArr);
+
+        if (!empty($propElementArr)) {
+
+            $PROP = [];
+
+            // первоначальные параметры созданой заявки
+            $PROP[1] = $propElementArr['PROPERTIES']['CUSTOMER_ID']['VALUE'];
+            $PROP[2] = $propElementArr['PROPERTIES']['CUSTOMER_FIO']['VALUE'];
+            $PROP[3] = $propElementArr['PROPERTIES']['CUSTOMER_PHONE']['VALUE'];
+            $PROP[4] = trim($propElementArr['PROPERTIES']['CUSTOMER_COMMENT']['VALUE']);
+            $PROP[6] = $propElementArr['PROPERTIES']['ATTACHED_FILES_FOR_TRANSLATE']['VALUE'];
+            // первоначальные параметры созданой заявки end
+
+            $PROP[7] = $propElementArr['PROPERTIES']['LINK_LIFE_DATE']['VALUE']; // Начало и конец активности ссылки
+            $PROP[15] = $propElementArr['PROPERTIES']['ATTACHED_FILES_WITH_TRANSLATE']['VALUE']; // файлы с готовым переводом
+            $PROP[8] = $propElementArr['PROPERTIES']['GENERATED_LINK']['VALUE']; // ссылка с переводом для заказчика
+            $PROP[9] = $propElementArr['PROPERTIES']['FIELD_PRICE']['VALUE']; // цена перевода заполненая переводчиком
+
+            switch ($status){
+                case 11: // В работе
+                     $PROP[5] = 6; // Статус заявки
+                    break;
+                case 12: // Срочная
+                     $PROP[5] = 7; // Статус заявки
+                    break;
+                case 13: // Выполненная
+                     $PROP[5] = 8; // Статус заявки
+                    break;
+                case 14: // Ошибка в переводе
+                     $PROP[5] = 9; // Статус заявки
+                    break;
+                case 15: // Завершена
+                     $PROP[5] = 10; // Статус заявки
+                    break;
+            }
+
+            $PROP[16] = $propElementArr['PROPERTIES']['TEXT_TRANSLATE']['VALUE']['TEXT']; // Текст с выполненым переводом
+            $PROP[17] = $propElementArr['PROPERTIES']['TRANSLATOR_ID']['VALUE']; // user id переводчика
+
+            // Данные для инфоблока "Заявки" id - 1
+            $arLoadProductArray = [
+                "IBLOCK_SECTION_ID" => false,
+                "IBLOCK_ID" => 1,
+                "PROPERTY_VALUES" => $PROP,
+                "ACTIVE" => "Y",
+            ];
+
+            $discussionId = $el->Update($idRequest, $arLoadProductArray);
+
+            echo 'update status: '. $discussionId .' status ' .$status;
+        }
+
+    }
+
 
     // Метод создает новое сообщение для заявки от лица "Переводчика"
     static public function addElementDiscussionTranslator($countFiles = null, $userId = null, $status = null, $idRequest = null, $createLink = false, $startLiveLinks = null, $endLiveLinks = null)
@@ -158,8 +279,7 @@ class Methods
 
                 self::updateElementRequestAddLinks($countFiles, $userId, $idRequest, $startLiveLinks, $endLiveLinks);
 
-            } else {
-                // Для менеджера (Переводчика)
+                // Для менеджера (Переводчика) при создании ссылки с переводом
                 $i = 0;
                 while ($i < $countFiles) {
 
@@ -189,8 +309,9 @@ class Methods
                         $PROP[13] = $idRequest; // ID заявки
                         $PROP[14] = getdate()[0]; // ID очереди сообщения к заявке (временная метка)
                         $PROP[12] = $status; // Статус к сообщению
-                        $PROP[11] = $jsonEncodeDiscussion; // ID очереди сообщения к заявке (временная метка)
+                        //$PROP[11] = $jsonEncodeDiscussion; // Id Прикрепленных файлов
                         $PROP[19] = json_encode($arrPropIdGroupUser); // Группа пользователя
+                        $PROP[20] = trim($_POST['comment']); // Коментарий
 
                         // Данные для инфоблока "Обсуждение" id - 2
                         $arLoadDiscussionArray = [
@@ -220,11 +341,109 @@ class Methods
 
                     $i++;
                 }
+
+            }
+
+            else {
+                // Для менеджера (Переводчика) создает новое сообщение для заявки без ссылки
+                $i = 0;
+                while ($i < $countFiles) {
+
+                    $arFiles = [
+                        "name" => $_FILES['upfiles']['name'][$i],
+                        "size" => $_FILES['upfiles']['size'][$i],
+                        "tmp_name" => $_FILES['upfiles']['tmp_name'][$i],
+                        "type" => $_FILES['upfiles']['type'][$i],
+                    ];
+
+                    $el = new CIBlockElement;
+
+                    if ($fid = CFile::SaveFile($arFiles, "uploads_work_files")) {
+
+                        $PROP = [];
+
+                        $arrPropIdsFilesDiscussion[] = $fid;
+                        $jsonEncodeDiscussion = json_encode($arrPropIdsFilesDiscussion);
+
+                        $arrPropIdGroupUser = [];
+                        $idGroupUser = json_decode($_POST['idGroupUser'], true);
+                        for($iIdGroupUser = 0; $iIdGroupUser < count($idGroupUser); $iIdGroupUser++){
+                            $arrPropIdGroupUser[] = (int) $idGroupUser[$iIdGroupUser];
+                        }
+
+                        $PROP[10] = $userId; // ID пользователя
+                        $PROP[13] = $idRequest; // ID заявки
+                        $PROP[14] = getdate()[0]; // ID очереди сообщения к заявке (временная метка)
+                        $PROP[12] = $status; // Статус к сообщению
+                        $PROP[11] = $jsonEncodeDiscussion; // Id Прикрепленных файлов
+                        $PROP[19] = json_encode($arrPropIdGroupUser); // Группа пользователя
+                        $PROP[20] = trim($_POST['comment']); // Коментарий
+
+                        // Данные для инфоблока "Обсуждение" id - 2
+                        $arLoadDiscussionArray = [
+                            "MODIFIED_BY" => $userId,
+                            "IBLOCK_SECTION_ID" => false,
+                            "IBLOCK_ID" => 2,
+                            "PROPERTY_VALUES" => $PROP,
+                            "NAME" => $_POST['title'],
+                            "ACTIVE" => "Y",
+                        ];
+
+                        if (empty(self::$discussionId)) {
+                            $discussionId = $el->Add($arLoadDiscussionArray);
+                            self::$discussionId = $discussionId;
+                        } else {
+                            if (!empty(self::$discussionId)) {
+                                $discussionId = $el->Update(self::$discussionId, $arLoadDiscussionArray);
+                            }
+                        }
+                        // Выводим id обсуждения
+                        echo "el id: {$discussionId}";
+
+                    } else {
+
+                        $PROP = [];
+
+                        //$arrPropIdsFilesDiscussion[] = $fid;
+                        //$jsonEncodeDiscussion = json_encode($arrPropIdsFilesDiscussion);
+
+                        $arrPropIdGroupUser = [];
+                        $idGroupUser = json_decode($_POST['idGroupUser'], true);
+                        for($iIdGroupUser = 0; $iIdGroupUser < count($idGroupUser); $iIdGroupUser++){
+                            $arrPropIdGroupUser[] = (int) $idGroupUser[$iIdGroupUser];
+                        }
+
+                        $PROP[10] = $userId; // ID пользователя
+                        $PROP[13] = $idRequest; // ID заявки
+                        $PROP[14] = getdate()[0]; // ID очереди сообщения к заявке (временная метка)
+                        $PROP[12] = $status; // Статус к сообщению
+                        //$PROP[11] = $jsonEncodeDiscussion; // Id Прикрепленных файлов
+                        $PROP[19] = json_encode($arrPropIdGroupUser); // Группа пользователя
+                        $PROP[20] = trim($_POST['comment']); // Коментарий
+
+                        // Данные для инфоблока "Обсуждение" id - 2
+                        $arLoadDiscussionArray = [
+                            "MODIFIED_BY" => $userId,
+                            "IBLOCK_SECTION_ID" => false,
+                            "IBLOCK_ID" => 2,
+                            "PROPERTY_VALUES" => $PROP,
+                            "NAME" => $_POST['title'],
+                            "ACTIVE" => "Y",
+                        ];
+
+                        $discussionId = $el->Add($arLoadDiscussionArray);
+
+                        // Выводим id обсуждения
+                        echo "el id: {$discussionId}";
+                    }
+
+                    $i++;
+                }
             }
         }
     }
 
-    // Метод создает новое сообщение для заявки от лица "Переводчика" и вносит данные для готового перевода
+    // Метод создает новое сообщение для заявки от лица "Переводчика" и вносит перевод в заявку (файлы + текс)
     static public function updateElementRequestAddLinks($countFiles = null, $userId = null, $idRequest = null, $startLiveLinks = null, $endLiveLinks = null)
     {
 
@@ -240,11 +459,8 @@ class Methods
             $_elElementProp = CIBlockElement::GetProperty(1, $idRequest, [], []);
 
             while ($elElementPropFields = $_elElementProp->Fetch()) {
-
                 $propElementArr['PROPERTIES'][$elElementPropFields['CODE']] = $elElementPropFields;
-
             }
-
         }
 
         // dump($propElementArr);
@@ -270,21 +486,21 @@ class Methods
 
                     $PROP = [];
 
-                    // первоначальные параметры
+                    // первоначальные параметры созданой заявки
                     $PROP[1] = $propElementArr['PROPERTIES']['CUSTOMER_ID']['VALUE'];
                     $PROP[2] = $propElementArr['PROPERTIES']['CUSTOMER_FIO']['VALUE'];
                     $PROP[3] = $propElementArr['PROPERTIES']['CUSTOMER_PHONE']['VALUE'];
                     $PROP[4] = trim($propElementArr['PROPERTIES']['CUSTOMER_COMMENT']['VALUE']);
                     $PROP[6] = $propElementArr['PROPERTIES']['ATTACHED_FILES_FOR_TRANSLATE']['VALUE'];
-                    // первоначальные параметры end
+                    // первоначальные параметры созданой заявки end
 
-                    $PROP[7] = json_encode([$startLiveLinks, $endLiveLinks]); // временные точки для ссылки
+                    $PROP[7] = json_encode([$startLiveLinks, $endLiveLinks]); // Начало и конец активности ссылки
                     $PROP[15] = $jsonE; // файлы с готовым переводом
-                    $PROP[8] = "/transfer-view/?ELEMENT_ID=" . $idRequest;
-                    $PROP[9] = $_POST['price'];
-                    $PROP[5] = 8; // заявка "Выполненная"
-                    $PROP[16] = trim($_POST['comment']); // Текст перевода
-                    $PROP[17] = $userId; // id переводчика
+                    $PROP[8] = "/transfer-view/?ELEMENT_ID=" . $idRequest; // ссылка с переводом для заказчика
+                    $PROP[9] = $_POST['price']; // цена перевода заполненая переводчиком
+                    $PROP[5] = 8; // Статус заявки id 8 - заявка "Выполненная"
+                    $PROP[16] = trim($_POST['textTranslate']); // Текст с выполненым переводом
+                    $PROP[17] = $userId; // user id переводчика
 
                     // Данные для инфоблока "Заявки" id - 1
                     $arLoadProductArray = [
@@ -299,9 +515,43 @@ class Methods
                     // Выводим id обсуждения
                     echo "id: " . $discussion . "<br>";
 
+
+                // Если нету файлов для перевода
                 } else {
-                    // Выводим ошибку
-                    echo "Error: " . $el->LAST_ERROR;
+
+                    $arrPropIdsFilesRequest[] = $fid;
+                    $jsonE = json_encode($arrPropIdsFilesRequest);
+
+                    $PROP = [];
+
+                    // первоначальные параметры созданой заявки
+                    $PROP[1] = $propElementArr['PROPERTIES']['CUSTOMER_ID']['VALUE'];
+                    $PROP[2] = $propElementArr['PROPERTIES']['CUSTOMER_FIO']['VALUE'];
+                    $PROP[3] = $propElementArr['PROPERTIES']['CUSTOMER_PHONE']['VALUE'];
+                    $PROP[4] = trim($propElementArr['PROPERTIES']['CUSTOMER_COMMENT']['VALUE']);
+                    $PROP[6] = $propElementArr['PROPERTIES']['ATTACHED_FILES_FOR_TRANSLATE']['VALUE'];
+                    // первоначальные параметры созданой заявки end
+
+                    $PROP[7] = json_encode([$startLiveLinks, $endLiveLinks]); // Начало и конец активности ссылки
+                    $PROP[15] = $jsonE; // файлы с готовым переводом
+                    $PROP[8] = "/transfer-view/?ELEMENT_ID=" . $idRequest; // ссылка с переводом для заказчика
+                    $PROP[9] = $_POST['price']; // цена перевода заполненая переводчиком
+                    $PROP[5] = 8; // Статус заявки id 8 - заявка "Выполненная"
+                    $PROP[16] = trim($_POST['textTranslate']); // Текст с выполненым переводом
+                    $PROP[17] = $userId; // user id переводчика
+
+                    // Данные для инфоблока "Заявки" id - 1
+                    $arLoadProductArray = [
+                        "IBLOCK_SECTION_ID" => false,
+                        "IBLOCK_ID" => 1,
+                        "PROPERTY_VALUES" => $PROP,
+                        "ACTIVE" => "Y",
+                    ];
+
+                    $discussion = $el->Update($idRequest, $arLoadProductArray);
+
+                    // Выводим id обсуждения
+                    echo "id: " . $discussion . "<br>";
                 }
 
                 $i++;

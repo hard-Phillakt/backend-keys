@@ -25,6 +25,8 @@ use Bitrix\Main\Page\Asset;
     Asset::getInstance()->addString('<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>');
     Asset::getInstance()->addString('<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>');
     Asset::getInstance()->addString('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>');
+    Asset::getInstance()->addJs('//mozilla.github.io/pdf.js/build/pdf.js');
+    Asset::getInstance()->addJs('https://cdnjs.cloudflare.com/ajax/libs/print-js/1.6.0/print.js');
     Asset::getInstance()->addJs(DEFAULT_TEMPLATE_PATH . '/js/custom.js');
     ?>
     <title>Document</title>

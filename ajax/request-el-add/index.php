@@ -26,7 +26,7 @@ $arrParam[] = $USER->GetID();
 
 $methodAction = "Methods::" . $_POST['action'];
 
-// call_user_func_array($methodAction, $arrParam);
+call_user_func_array($methodAction, $arrParam);
 
 
 

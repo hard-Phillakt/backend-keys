@@ -2,3 +2,7 @@
 .app-wrapper {
     margin-top: 100px;
 }
+
+.form-group__translate-create-link {
+    display: none;
+}
