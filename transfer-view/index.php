@@ -9,6 +9,7 @@ $APPLICATION->SetTitle("Страница перевода");
             <div class="row">
                 <div class="col-lg-12">
                     <h2>Страница перевода</h2>
+
                     <? $APPLICATION->IncludeComponent(
                         "bitrix:news.detail",
                         "transfer_view",

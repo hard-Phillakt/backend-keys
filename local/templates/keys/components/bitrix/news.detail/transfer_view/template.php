@@ -47,7 +47,7 @@ $this->setFrameMode(true);
         pageNum = 1,
         pageRendering = false,
         pageNumPending = null,
-        scale = 1.5,
+        scale = 1,
         canvas = document.getElementById('the-canvas'),
         ctx = canvas.getContext('2d');
 

@@ -39,7 +39,7 @@ class Methods
                         $PROP[2] = $_POST['fio'];
                         $PROP[3] = $_POST['phone'];
                         $PROP[4] = trim($_POST['comment']);
-                        $PROP[5] = 6; // "В работе"
+                        $PROP[5] = $_POST['status']; // "В работе id - 6, Срочная id - 7"
                         $PROP[6] = $jsonE;
 
                         $arLoadProductArray = [
@@ -63,16 +63,18 @@ class Methods
                         }
 
                         // Выводим успех
-                        // echo "id: ". $prodId . "<br>";
+                        // return $requestId;
                     }
 
                 } else {
                     // Выводим ошибку
-                    //echo "Error: ".$el->LAST_ERROR;
+                    // echo false;
                 }
 
                 $i++;
             }
+
+            return self::$requestId;
         }
     }
 

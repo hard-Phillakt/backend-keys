@@ -3,7 +3,14 @@
 
 ?>
 
+<?php if($findGroupAdmin || $findGroupMFC || $findGroupKeys): ?>
+
+</section>
+</div>
+
 
 </body>
 </html>
+
+<?php endif; ?>
 
