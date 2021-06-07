@@ -201,7 +201,8 @@ ksort($discussionsArrSort, SORT_NUMERIC);
                         <h3 class="panel-title">
                             <?= trim($arGroup['NAME']); ?>
                             : <?= $arCurrentUser['EMAIL']; ?>
-                            | <?= $key['TIMESTAMP_X']; ?></h3>
+                            | <?= $key['TIMESTAMP_X']; ?>
+                        </h3>
                     </div>
                     <div class="panel-body">
 

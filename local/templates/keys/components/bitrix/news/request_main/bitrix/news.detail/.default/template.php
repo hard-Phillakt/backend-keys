@@ -12,6 +12,11 @@
 /** @var CBitrixComponent $component */
 $this->setFrameMode(true);
 
+$arUserGroups = CUser::GetUserGroup($USER->GetID());
+$findGroupAdmin = in_array("1", $arUserGroups);
+$findGroupMFC = in_array("6", $arUserGroups);
+$findGroupKeys = in_array("5", $arUserGroups);
+
 // dump($arParams);
 
 // dump($arResult);
@@ -51,12 +56,11 @@ foreach ($discussionsArr as $key) {
 
 ksort($discussionsArrSort, SORT_NUMERIC);
 
-// dump($discussionsArrSort);
-
-
 ?>
 
-<div class="keys-translr__box_wrap-request">
+<?php if($findGroupAdmin || $findGroupMFC || $findGroupKeys): ?>
+
+    <div class="keys-translr__box_wrap-request">
     <div class="keys-translr__box-header pt-20 pb-20 pl-60 pr-60 mb-60">
         <div id="humburger-btn" class="humburger-wrap">
             <span class="humburger-line humburger-start"></span>
@@ -94,19 +98,17 @@ ksort($discussionsArrSort, SORT_NUMERIC);
 
             <?php
 
-            // dump($arResult);
-
             $idUserCustomer = $arResult['PROPERTIES']['CUSTOMER_ID']['VALUE'];
             $currentUserCustomer = $USER::GetByID($idUserCustomer);
             $arCurrentUserCustomer = $currentUserCustomer->Fetch(); // данные о пользователе
 
-            // dump($arCurrentUserCustomer);
             ?>
 
             <!-- Заявка в закрепе -->
             <div class="keys-translr__box-discussion-bshadow mb-40">
                 <div class="keys-translr__box-discussion-customer pt-20 pb-20 pl-20 pr-20 color__white fs-16">
-                    <span>МФЦ:<?= $arCurrentUserCustomer['NAME'] ?></span> <span><?= $arCurrentUserCustomer['EMAIL'] ?></span> |
+                    <span>МФЦ:<?= $arCurrentUserCustomer['NAME'] ?></span>
+                    <span><?= $arCurrentUserCustomer['EMAIL'] ?></span> |
                     <span><?= $arResult['TIMESTAMP_X']; ?></span>
                 </div>
                 <div class="fjc-sb fw-wrap">
@@ -139,7 +141,7 @@ ksort($discussionsArrSort, SORT_NUMERIC);
                                                 echo '<span class="status-str__danger">Срочная</span>';
                                                 break;
                                             case (8): // Выполненная  8
-                                                echo '<span class="status-str__success">Выполненная</span>';
+                                                echo '<span class="status-str__success">Перевод выполнен</span>';
                                                 break;
                                             case (9): // Ошибка в переводе 9
                                                 echo '<span class="status-str__warning">Ошибка в переводе</span>';
@@ -153,7 +155,8 @@ ksort($discussionsArrSort, SORT_NUMERIC);
                                     </li>
                                 </ul>
                                 <div class="mt-20 mb-20">
-                                    <ul class="keys-translr__box-discussion-content_files">
+                                    <div class="fontw-700 fs-16 mb-10">Файлы для перевода:</div>
+                                    <ul class="keys-translr__box-discussion-content_files fjc-s fw-wrap">
 
                                         <?php
 
@@ -164,14 +167,16 @@ ksort($discussionsArrSort, SORT_NUMERIC);
                                             $urlFile = CFile::GetPath($key);
                                             $dataFile = CFile::GetByID($key);
                                             $arrDataFile = $dataFile->Fetch();
-                                            // dump($arrDataFile);
+
                                             ?>
-                                            <li class="fjc-s fai-e mb-10 mr-10">
+
+                                            <li class="fjc-s fai-e mb-10 mr-30">
                                               <span class="pr-10">
                                                   <img src="<?= DEFAULT_TEMPLATE_PATH ?>/img/icons/file.svg" alt="file"/>
                                               </span>
                                                 <a href="<?= $urlFile; ?>" class="fs-16 color__blue-light"><?= $arrDataFile['ORIGINAL_NAME']; ?></a>
                                             </li>
+
                                         <?php endforeach; ?>
 
                                     </ul>
@@ -195,7 +200,7 @@ ksort($discussionsArrSort, SORT_NUMERIC);
                                         echo '<span class="status-str__danger">Срочная</span>';
                                         break;
                                     case (8): // Выполненная  8
-                                        echo '<span class="status-str__success">Выполненная</span>';
+                                        echo '<span class="status-str__success">Перевод выполнен</span>';
                                         break;
                                     case (9): // Ошибка в переводе 9
                                         echo '<span class="status-str__warning">Ошибка в переводе</span>';
@@ -203,16 +208,32 @@ ksort($discussionsArrSort, SORT_NUMERIC);
                                     case (10): // Завершена 10
                                         echo '<span class="status-str__default">Завершена</span>';
                                         break;
-
                                 }
 
                                 ?>
                             </div>
 
-                            <?php if (!empty($arResult['PROPERTIES']['GENERATED_LINK']['VALUE'])): ?>
+                            <?php
+
+                            if (!empty($arResult['CODE']) && $arResult["PROPERTIES"]["STATUS"]["VALUE_ENUM_ID"] == 8): ?>
+                                <div>
+                                    <div>
+                                        <span class="fontw-700">Время действия ссылки:</span>
+
+                                        <div>
+                                            <?php $strToArrLinkLife = json_decode($arResult['PROPERTIES']['LINK_LIFE_DATE']['VALUE'], true); ?>
+                                            <span>с </span> <?= date("m-d-Y h:i:s", $strToArrLinkLife[0]); ?>
+                                        </div>
+
+                                        <div>
+                                           <span>по </span> <?= date("m-d-Y h:i:s", $strToArrLinkLife[1]); ?>
+                                        </div>
+
+                                    </div>
+                                </div>
                                 <div>
                                     <span class="fontw-700">Ссылка:</span>
-                                    <a class="keys-translr__box-discussion-content_transfer-link" href="/transfer-view/?hash=05512f70d2dd5b9538ba5b3f22b33993">Страница с переводом</a>
+                                    <a class="keys-translr__box-discussion-content_transfer-link" href="/transfer-view/?hash=<?= $arResult['CODE']; ?>">Страница с переводом</a>
                                 </div>
                             <?php endif; ?>
 
@@ -265,48 +286,108 @@ ksort($discussionsArrSort, SORT_NUMERIC);
                             <!-- Обсуждение от лица переводчика -->
                             <div class="keys-translr__box-discussion-bshadow mb-40">
                                 <div class=" keys-translr__box-discussion-executor pt-20 pb-20 pl-20 pr-20 color__white fs-16">
-                                    <span>Агентство переводов ООО «Ключи»:</span>
-                                    <span>klych_user@info.ru</span> |
-                                    <span>25.05.2021 13:07:49</span>
+                                    <span><?= trim($arGroup['NAME']); ?>:</span>
+                                    <span><?= $arCurrentUser['EMAIL']; ?> | </span>
+                                    <span><?= $key['TIMESTAMP_X']; ?></span>
                                 </div>
                                 <div class="fjc-sb fw-wrap">
-                                    <div class="fjc-sb pt-20 pb-20 pl-20 pr-20 flex__50">
+                                    <div class="fjc-s pt-20 pb-20 pl-20 pr-20 flex__50">
                                         <div class="executor-logo pr-40 mb-20">
                                             <img src="<?= DEFAULT_TEMPLATE_PATH ?>/img/icons/executor.svg" alt="executor"/>
                                         </div>
                                         <div>
                                             <div class="color__black fs-16">
-                                                Lorem ipsum dolor sit amet consectetur, adipisicing
-                                                elit. Maiores nobis, dignissimos aspernatur
-                                                assumenda aliquam in alias harum, perferendis labore
-                                                porro sint fugiat qui incidunt. Dolore corporis
-                                                laudantium nesciunt natus reiciendis?
+                                                <?= $key['PROP']['COMMENT']['VALUE']['TEXT']; ?>
                                             </div>
                                             <div class="mt-20 mb-20">
-                                                <ul class="keys-translr__box-discussion-content_files">
-                                                    <li class="fjc-s fai-e mb-10 mr-10">
-                                                <span class="pr-10">
-                                                    <img src="<?= DEFAULT_TEMPLATE_PATH ?>/img/icons/file.svg" alt="file"/>
-                                                </span>
-                                                        <a href="#!" class="fs-16 color__blue-light">file.pdf</a>
-                                                    </li>
+
+                                                <ul class="keys-translr__box-discussion-content_files fjc-s">
+
+                                                    <?php
+
+                                                    $attachedFilesTranslate = json_decode($key['PROP']['ATTACHED_FILES']['VALUE'], true);
+
+                                                    foreach ($attachedFilesTranslate as $keyFiles):
+
+                                                        $urlFile = CFile::GetPath($keyFiles);
+                                                        $dataFile = CFile::GetByID($keyFiles);
+                                                        $arrDataFile = $dataFile->Fetch();
+                                                        //dump($arrDataFile);
+
+                                                        ?>
+
+                                                        <li class="fjc-s fai-e mb-10 mr-30">
+                                                            <span class="pr-10">
+                                                                <img src="<?= DEFAULT_TEMPLATE_PATH ?>/img/icons/file.svg" alt="file"/>
+                                                            </span>
+                                                            <a href="<?= $urlFile; ?>" class="fs-16 color__blue-light"><?= $arrDataFile['ORIGINAL_NAME']; ?></a>
+                                                        </li>
+
+                                                    <?php endforeach; ?>
+
                                                 </ul>
+
                                             </div>
                                         </div>
                                     </div>
                                     <div class="fjc-sb flex__35">
-                                        <div class="fjc-s ffd-column fw-wrap pt-20 pb-20 pl-20 pr-20 fs-16">
-                                            <div>
-                                                <span class="fontw-700">Статус:</span>
-                                                <span class="status-str status-str__primary">Выполненная</span>
+
+                                        <?php if(!empty($key['PROP']['STATUS']['VALUE'])): ?>
+
+                                            <div class="fjc-s ffd-column fw-wrap pt-20 pb-20 pl-20 pr-20 fs-16">
+                                                <div>
+                                                    <span class="fontw-700">Статус:</span>
+
+                                                    <?php
+
+                                                        switch ($key["PROP"]["STATUS"]["VALUE"]){
+
+                                                            case 11:
+                                                                echo '<span class="status-str status-str__primary">' . $key["PROP"]["STATUS"]["VALUE_ENUM"] . '</span>';
+                                                                break;
+                                                            case 12:
+                                                                echo '<span class="status-str status-str__danger">' . $key["PROP"]["STATUS"]["VALUE_ENUM"] . '</span>';
+                                                                break;
+                                                            case 13:
+                                                                echo '<span class="status-str status-str__success">' . $key["PROP"]["STATUS"]["VALUE_ENUM"] . '</span>';
+                                                                break;
+                                                            case 14:
+                                                                echo '<span class="status-str status-str__warning">' . $key["PROP"]["STATUS"]["VALUE_ENUM"] . '</span>';
+                                                                break;
+                                                            case 15:
+                                                                echo '<span class="status-str status-str__default">' . $key["PROP"]["STATUS"]["VALUE_ENUM"] . '</span>';
+                                                                break;
+                                                        }
+
+                                                    ?>
+
+
+
+                                                </div>
+
+                                                <?php if($key["PROP"]["STATUS"]["VALUE"] == 13):
+
+                                                    // dump($arResult['PROPERTIES']['FIELD_PRICE']['VALUE']);
+
+                                                    ?>
+                                                    <div>
+                                                        <span class="fontw-700">Ссылка:</span>
+                                                        <span class="status-str status-str__warning"><?= $arResult['PROPERTIES']['FIELD_PRICE']['VALUE']; ?> ₽</span>
+                                                    </div>
+
+                                                    <div>
+                                                        <span class="fontw-700">Ссылка:</span>
+                                                        <a class="keys-translr__box-discussion-content_transfer-link" href="/transfer-view/?hash=<?= $arResult['CODE']; ?>">
+                                                            Страница перевода
+                                                        </a>
+                                                    </div>
+                                                <?php endif;?>
+
+
                                             </div>
-                                            <div>
-                                                <span class="fontw-700">Ссылка:</span>
-                                                <a class="keys-translr__box-discussion-content_transfer-link" href="/transfer-view/?hash=05512f70d2dd5b9538ba5b3f22b33993">
-                                                    страница перевода
-                                                </a>
-                                            </div>
-                                        </div>
+
+                                        <?php endif; ?>
+
                                     </div>
                                 </div>
                             </div>
@@ -315,7 +396,6 @@ ksort($discussionsArrSort, SORT_NUMERIC);
                         <?php else: ?>
 
                             <?php
-
                             // выводим данные по группе
                             $lastIdGroup = end($strToArrGroupUser);
                             $propGroup = CGroup::GetByID($lastIdGroup, "Y");
@@ -332,46 +412,94 @@ ksort($discussionsArrSort, SORT_NUMERIC);
                             <!-- Обсуждение от лица заказчика -->
                             <div class="keys-translr__box-discussion-bshadow mb-40">
                                 <div class=" keys-translr__box-discussion-customer pt-20 pb-20 pl-20 pr-20 color__white fs-16">
-                                    <span>МФЦ:</span> <span>mail@mail.ru</span> |
-                                    <span>21.01.2021 13:05:56</span>
+                                    <span><?= trim($arGroup['NAME']); ?>:</span>
+                                    <span><?= $arCurrentUser['EMAIL']; ?> |</span>
+                                    <span><?= $key['TIMESTAMP_X']; ?></span>
                                 </div>
                                 <div class="fjc-sb fw-wrap">
-                                    <div class="fjc-sb pt-20 pb-20 pl-20 pr-20 flex__50">
+                                    <div class="fjc-s pt-20 pb-20 pl-20 pr-20 flex__50">
                                         <div class="customer-logo pr-40 mb-20">
                                             <img src="<?= DEFAULT_TEMPLATE_PATH ?>/img/icons/customer.svg" alt="customer"/>
                                         </div>
                                         <div>
                                             <div class="color__black fs-16">
-                                                Lorem ipsum dolor sit amet consectetur, adipisicing
-                                                elit. Maiores nobis, dignissimos aspernatur
-                                                assumenda aliquam in alias harum, perferendis labore
-                                                porro sint fugiat qui incidunt. Dolore corporis
-                                                laudantium nesciunt natus reiciendis?
+                                                <?= $key['PROP']['COMMENT']['VALUE']['TEXT']; ?>
                                             </div>
                                             <div class="mt-20 mb-20">
-                                                <ul class="keys-translr__box-discussion-content_files">
-                                                    <li class="fjc-s fai-e mb-10 mr-10">
-                                                <span class="pr-10">
-                                                    <img src="<?= DEFAULT_TEMPLATE_PATH ?>/img/icons/file.svg" alt="file"/>
-                                                </span>
-                                                        <a href="#!" class="fs-16 color__blue-light">file.pdf</a>
-                                                    </li>
+                                                <ul class="keys-translr__box-discussion-content_files fjc-s">
+
+
+                                                    <?php
+
+                                                    $attachedFilesTranslate = json_decode($key['PROP']['ATTACHED_FILES']['VALUE'], true);
+
+                                                    foreach ($attachedFilesTranslate as $keyFiles):
+
+                                                        $urlFile = CFile::GetPath($keyFiles);
+                                                        $dataFile = CFile::GetByID($keyFiles);
+                                                        $arrDataFile = $dataFile->Fetch();
+                                                        //dump($arrDataFile);
+
+                                                        ?>
+
+                                                        <li class="fjc-s fai-e mb-10 mr-30">
+                                                            <span class="pr-10">
+                                                                <img src="<?= DEFAULT_TEMPLATE_PATH ?>/img/icons/file.svg" alt="file"/>
+                                                            </span>
+                                                            <a href="<?= $urlFile; ?>" class="fs-16 color__blue-light"><?= $arrDataFile['ORIGINAL_NAME']; ?></a>
+                                                        </li>
+
+                                                    <?php endforeach; ?>
+
                                                 </ul>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="flex__35">
-                                        <div class=" fjc-s ffd-column fw-wrap pt-20 pb-20 pl-20 pr-20 fs-16">
-                                            <div>
-                                                <span class="fontw-700">Статус:</span>
-                                                <span class="status-str status-str__warning">Ошибка в переводе</span>
+
+                                    <div class="fjc-sb flex__35">
+
+                                        <?php
+
+                                        if(!empty($key['PROP']['STATUS']['VALUE'])): ?>
+
+                                            <div class="fjc-s ffd-column fw-wrap pt-20 pb-20 pl-20 pr-20 fs-16">
+                                                <div>
+                                                    <span class="fontw-700">Статус:</span>
+
+                                                    <?php
+
+                                                    switch ($key["PROP"]["STATUS"]["VALUE"]){
+
+                                                        case 11:
+                                                            echo '<span class="status-str status-str__primary">' . $key["PROP"]["STATUS"]["VALUE_ENUM"] . '</span>';
+                                                            break;
+                                                        case 12:
+                                                            echo '<span class="status-str status-str__danger">' . $key["PROP"]["STATUS"]["VALUE_ENUM"] . '</span>';
+                                                            break;
+                                                        case 13:
+                                                            echo '<span class="status-str status-str__success">' . $key["PROP"]["STATUS"]["VALUE_ENUM"] . '</span>';
+                                                            break;
+                                                        case 14:
+                                                            echo '<span class="status-str status-str__warning">' . $key["PROP"]["STATUS"]["VALUE_ENUM"] . '</span>';
+                                                            break;
+                                                        case 15:
+                                                            echo '<span class="status-str status-str__default">' . $key["PROP"]["STATUS"]["VALUE_ENUM"] . '</span>';
+                                                            break;
+                                                    }
+
+                                                    ?>
+
+                                                </div>
+
                                             </div>
-                                        </div>
+
+                                        <?php endif; ?>
+
                                     </div>
+
                                 </div>
                             </div>
                             <!-- Обсуждение от лица заказчика end -->
-
 
                         <?php endif; ?>
 
@@ -390,8 +518,10 @@ ksort($discussionsArrSort, SORT_NUMERIC);
                     $rsUser = $USER::GetByID($USER->GetID());
                     $arUser = $rsUser->Fetch(); // данные о пользователе
                     $arGroups = $USER->GetUserGroupArray(); // id групп пользователя
+                    $arGroupsStr = implode(',', $arGroups);
+                    // dump($arGroups);
 
-                    $findGroupKeys = in_array("5", $arGroups);
+                    $findGroupKeys = in_array("6", $arGroups); // Агентство переводов ООО «Ключи»
                     // dump($findGroupKeys);
 
                 ?>
@@ -400,7 +530,7 @@ ksort($discussionsArrSort, SORT_NUMERIC);
                 // Если переводчик
                 if($findGroupKeys): ?>
 
-                    <?$APPLICATION->IncludeComponent(
+                    <? $APPLICATION->IncludeComponent(
                         "bitrix:main.include",
                         "",
                         Array(
@@ -409,11 +539,11 @@ ksort($discussionsArrSort, SORT_NUMERIC);
                             "EDIT_TEMPLATE" => "",
                             "PATH" => "/include/form/translator/index.php"
                         )
-                    );?>
+                    ); ?>
 
                 <?php  else: ?>
 
-                    <?$APPLICATION->IncludeComponent(
+                    <? $APPLICATION->IncludeComponent(
                         "bitrix:main.include",
                         "",
                         Array(
@@ -422,13 +552,26 @@ ksort($discussionsArrSort, SORT_NUMERIC);
                             "EDIT_TEMPLATE" => "",
                             "PATH" => "/include/form/customer/index.php"
                         )
-                    );?>
+                    );
+
+                    ?>
 
                 <?php  endif; ?>
 
             </div>
             <!-- Форма end -->
+
         </div>
 
     </div>
 </div>
+
+<?php else: ?>
+
+    <div class="mt-60 pl-60 pr-60">
+        <div class="fjc-c mb-30">
+            <h1 class="color__black fs-28"><span class="status-str__danger">Доступ ограничен!</span></h1>
+        </div>
+    </div>
+
+<?php endif; ?>

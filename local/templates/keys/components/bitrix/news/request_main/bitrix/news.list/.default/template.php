@@ -21,8 +21,8 @@ $filterClose = $_GET['filter-close'];
 
 $arUserGroups = CUser::GetUserGroup($USER->GetID());
 $findGroupAdmin = in_array("1", $arUserGroups);
-$findGroupMFC = in_array("6", $arUserGroups);
-$findGroupKeys = in_array("5", $arUserGroups);
+$findGroupMFC = in_array("5", $arUserGroups);
+$findGroupKeys = in_array("6", $arUserGroups);
 
 ?>
 
@@ -44,9 +44,13 @@ $findGroupKeys = in_array("5", $arUserGroups);
                 </div>
             </div>
             <div class="keys-translr__box-controls pl-60 pr-60 fjc-sb">
+
                 <div class="mb-30">
-                    <a href="/create-request/" class="keys-translr__box-controls_create-req">Создать заявку</a>
+                    <?php if($findGroupAdmin || $findGroupMFC): ?>
+                        <a href="/create-request/" class="keys-translr__box-controls_create-req">Создать заявку</a>
+                    <?php endif; ?>
                 </div>
+
                 <div class="fai-c mb-30 fw-wrap">
                     <div class="fjc-sb fw-wrap">
                         <div class="keys-translr__box-controls_search mb-30 mr-60">
@@ -60,13 +64,13 @@ $findGroupKeys = in_array("5", $arUserGroups);
                         <div class="keys-translr__box-controls_filter fai-c mb-30">
                             <div class="fai-c fjc-sb">
                                 <div>
-                                    <a href="/" class="keys-translr__box-controls_filter-all">Все</a>
+                                    <a href="/list/" class="keys-translr__box-controls_filter-all">Все</a>
                                 </div>
                                 <div class="pl-20">
-                                    <a href="/?filter-open=10" class="keys-translr__box-controls_filter-open">Открытые</a>
+                                    <a href="/list/?filter-open=10" class="keys-translr__box-controls_filter-open">Открытые</a>
                                 </div>
                                 <div class="pl-20">
-                                    <a href="/?filter-close=10" class="keys-translr__box-controls_filter-close">Закрытые</a>
+                                    <a href="/list/?filter-close=10" class="keys-translr__box-controls_filter-close">Закрытые</a>
                                 </div>
                             </div>
                         </div>
@@ -324,12 +328,7 @@ $findGroupKeys = in_array("5", $arUserGroups);
         </div>
     </div>
 
-<?php else: ?>
-
-    <div class="mt-60 pl-60 pr-60">
-        <div class="fjc-c mb-30">
-            <h1 class="color__black fs-28"><span class="status-str__danger">Доступ ограничен!</span></h1>
-        </div>
-    </div>
+<?php else:
+        header('Location: /'); ?>
 
 <?php endif; ?>

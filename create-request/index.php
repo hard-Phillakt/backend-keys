@@ -9,6 +9,11 @@ $APPLICATION->SetTitle("Создание заявки");
 
     <div class="keys-translr__box_wrap-request">
         <div class="keys-translr__box-header pt-20 pb-20 pl-60 pr-60 mb-60">
+            <div id="humburger-btn" class="humburger-wrap">
+                <span class="humburger-line humburger-start"></span>
+                <span class="humburger-line humburger-middle"></span>
+                <span class="humburger-line humburger-end"></span>
+            </div>
             <div class="fjc-s fai-c">
                 <div><img src="<?= DEFAULT_TEMPLATE_PATH  ?>/img/logo/logo-blue.svg" alt="logo-blue" /></div>
                 <div class="pl-10 color__blue-light fs-20 fontw-700">
@@ -17,8 +22,16 @@ $APPLICATION->SetTitle("Создание заявки");
             </div>
         </div>
         <div class="pl-60 pr-60">
-            <div class="mb-30">
-                <h1 class="color__black fs-28">Новая заявка</h1>
+            <div class="fjc-s fai-c fw-wrap mb-30">
+                <div class="fjc-s mr-40">
+                    <a href="/list/" class=" fjc-s keys-translr__box-discussion-header_back-link mb-20">
+                        <span class="pr-10">
+                            <img src="<?= DEFAULT_TEMPLATE_PATH ?>/img/icons/left-arrow.svg" alt="left-arrow"/>
+                        </span>
+                        Все заявки
+                    </a>
+                </div>
+                <h1 class="color__black fs-28 mb-20">Новая заявка</h1>
             </div>
             <form id="create-req" class="keys-translr__box-form pt-30 pb-30 pl-30 pr-30">
                 <div class="mb-20">
@@ -90,13 +103,8 @@ $APPLICATION->SetTitle("Создание заявки");
         </div>
     </div>
 
-    <?php else: ?>
-
-        <div class="mt-60 pl-60 pr-60">
-            <div class="fjc-c mb-30">
-                <h1 class="color__black fs-28"><span class="status-str__danger">Доступ ограничен!</span></h1>
-            </div>
-        </div>
+    <?php else:
+            header('Location: /');?>
 
     <?php endif;?>
 

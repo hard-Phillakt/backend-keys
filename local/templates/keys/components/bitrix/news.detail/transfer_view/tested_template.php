@@ -12,112 +12,30 @@
 /** @var CBitrixComponent $component */
 $this->setFrameMode(true);
 
-
-
-$arUserGroups = CUser::GetUserGroup($USER->GetID());
-$findGroupAdmin = in_array("1", $arUserGroups);
-$findGroupMFC = in_array("5", $arUserGroups);
-$findGroupKeys = in_array("6", $arUserGroups);
-
-
-$arFile = json_decode($arResult["PROPERTIES"]["ATTACHED_FILES_WITH_TRANSLATE"]["VALUE"], true);
-$getFile = CFile::GetPath($arFile[0]);
-
 ?>
 
-<div class="keys-translr__box_wrap-request">
-    <!-- header -->
-    <div class="keys-translr__box-header pt-20 pb-20 pl-60 pr-60 mb-60">
-        <!-- humburger -->
-        <div id="humburger-btn" class="humburger-wrap">
-            <span class="humburger-line humburger-start"></span>
-            <span class="humburger-line humburger-middle"></span>
-            <span class="humburger-line humburger-end"></span>
-        </div>
-        <!-- humburger end -->
-
-        <div class="fjc-s fai-c">
-            <div>
-                <img src="<?= DEFAULT_TEMPLATE_PATH ?>/img/logo/logo-blue.svg" alt="logo-blue" />
-            </div>
-            <div class="pl-10 color__blue-light fs-20 fontw-700">
-                Переводы
-            </div>
+<div class="container" id="123">
+    <div class="row">
+        <div class="col-lg-12">
+            <button id="screen">screen</button>
+            <button id="page_count">page_count</button>
+            <button id="prev">prev</button>
+            <button id="next">next</button>
+<!--            <a class="link" href="" download>download</a>-->
+<!--            <img class="link" src="" alt="">-->
         </div>
     </div>
-
-    <div class="pl-60 pr-60">
-
-        <div class="fjc-c mb-30 mt-30">
-            <h3 class="color__black fs-28">
-                <?= $arResult['NAME'] ?>
-            </h3>
-        </div>
-
-        <div class="keys-translr__box-canvas__print">
-            <div class="fjc-c mb-30">
-                <a
-                        href="#!"
-                        id="screen"
-                        class="
-                    button__primary
-                    color__white
-                    pl-30
-                    pr-30
-                    pt-10
-                    pb-10
-                    fs-16
-                  "
-                >
-                    <span class="mr-10">&#128438;</span> Распечатать</a
-                >
-            </div>
-        </div>
-
-        <div
-                class="
-                keys-translr__box-canvas__count-page
-                fjc-c
-                fai-c
-                ffd-column
-                fw-wrap
-              "
-        >
-            <div class="mb-20 mb-20">
-                <span class="fs-18 fontw-700">Количество страниц: <span id="page_count"></span></span>
-            </div>
-<!--            <div class="mb-20 mb-20">-->
-<!--                <span class="fs-18 fontw-700">Текущая страница: <span>12</span></span>-->
-<!--            </div>-->
-        </div>
-
-        <div class="mt-20 mb-20">
-            <div class="keys-translr__box-canvas-wrap">
-                <canvas id="the-canvas" class="mb-90"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <div id="<?= $findGroupAdmin || $findGroupMFC || $findGroupKeys ? '' : 'keys-translr-2'  ?>">
-
-        <div class="keys-translr__box-canvas__toggle fjc-c fai-c fw-wrap">
-            <div class="mr-10 ml-10">
-                <a href="#!" id="prev" class="keys-translr__box-canvas__toggle-prev"></a>
-            </div>
-            <div class="mr-10 ml-10">
-                <a href="#!" id="next" class="keys-translr__box-canvas__toggle-next"></a>
-            </div>
-        </div>
-    </div>
-
 </div>
 
+<div class="the-canvas">
+    <canvas id="the-canvas"></canvas>
+</div>
+
+
+
+
 <script>
-
-    // window.oncontextmenu = function () {return false;}
-    // window.onkeydown = function () {return false;}
-
-    var url = '<?= $getFile ?>';
+    var url = 'http://klyuchi.sitexpert.beget.tech/upload/uploads_work_files/477/477887c57e699f924d3f8290bf2b6c8e.pdf';
 
     // Loaded via <script> tag, create shortcut to access PDF.js exports.
     var pdfjsLib = window['pdfjs-dist/build/pdf'];
@@ -129,7 +47,7 @@ $getFile = CFile::GetPath($arFile[0]);
         pageNum = 1,
         pageRendering = false,
         pageNumPending = null,
-        scale = 1.3,
+        scale = 1,
         canvas = document.getElementById('the-canvas'),
         ctx = canvas.getContext('2d');
 
@@ -242,4 +160,110 @@ $getFile = CFile::GetPath($arFile[0]);
        // printJS({printable:'http://klyuchi.sitexpert.beget.tech/upload/uploads_work_files/477/477887c57e699f924d3f8290bf2b6c8e.pdf', type:'pdf'})
     })
 
+
 </script>
+
+
+
+
+<div class="news-detail" style="display: none">
+	<?if($arParams["DISPLAY_PICTURE"]!="N" && is_array($arResult["DETAIL_PICTURE"])):?>
+		<img
+			class="detail_picture"
+			border="0"
+			src="<?=$arResult["DETAIL_PICTURE"]["SRC"]?>"
+			width="<?=$arResult["DETAIL_PICTURE"]["WIDTH"]?>"
+			height="<?=$arResult["DETAIL_PICTURE"]["HEIGHT"]?>"
+			alt="<?=$arResult["DETAIL_PICTURE"]["ALT"]?>"
+			title="<?=$arResult["DETAIL_PICTURE"]["TITLE"]?>"
+			/>
+	<?endif?>
+	<?if($arParams["DISPLAY_DATE"]!="N" && $arResult["DISPLAY_ACTIVE_FROM"]):?>
+		<span class="news-date-time"><?=$arResult["DISPLAY_ACTIVE_FROM"]?></span>
+	<?endif;?>
+	<?if($arParams["DISPLAY_NAME"]!="N" && $arResult["NAME"]):?>
+		<h3><?=$arResult["NAME"]?></h3>
+	<?endif;?>
+	<?if($arParams["DISPLAY_PREVIEW_TEXT"]!="N" && $arResult["FIELDS"]["PREVIEW_TEXT"]):?>
+		<p><?=$arResult["FIELDS"]["PREVIEW_TEXT"];unset($arResult["FIELDS"]["PREVIEW_TEXT"]);?></p>
+	<?endif;?>
+	<?if($arResult["NAV_RESULT"]):?>
+		<?if($arParams["DISPLAY_TOP_PAGER"]):?><?=$arResult["NAV_STRING"]?><br /><?endif;?>
+		<?echo $arResult["NAV_TEXT"];?>
+		<?if($arParams["DISPLAY_BOTTOM_PAGER"]):?><br /><?=$arResult["NAV_STRING"]?><?endif;?>
+	<?elseif(strlen($arResult["DETAIL_TEXT"])>0):?>
+		<?echo $arResult["DETAIL_TEXT"];?>
+	<?else:?>
+		<?echo $arResult["PREVIEW_TEXT"];?>
+	<?endif?>
+	<div style="clear:both"></div>
+	<br />
+	<?foreach($arResult["FIELDS"] as $code=>$value):
+		if ('PREVIEW_PICTURE' == $code || 'DETAIL_PICTURE' == $code)
+		{
+			?><?=GetMessage("IBLOCK_FIELD_".$code)?>:&nbsp;<?
+			if (!empty($value) && is_array($value))
+			{
+				?><img border="0" src="<?=$value["SRC"]?>" width="<?=$value["WIDTH"]?>" height="<?=$value["HEIGHT"]?>"><?
+			}
+		}
+		else
+		{
+			?><?=GetMessage("IBLOCK_FIELD_".$code)?>:&nbsp;<?=$value;?><?
+		}
+		?><br />
+	<?endforeach;
+	foreach($arResult["DISPLAY_PROPERTIES"] as $pid=>$arProperty):?>
+
+		<?=$arProperty["NAME"]?>:&nbsp;
+		<?if(is_array($arProperty["DISPLAY_VALUE"])):?>
+			<?=implode("&nbsp;/&nbsp;", $arProperty["DISPLAY_VALUE"]);?>
+		<?else:?>
+			<?=$arProperty["DISPLAY_VALUE"];?>
+		<?endif?>
+		<br />
+	<?endforeach;
+	if(array_key_exists("USE_SHARE", $arParams) && $arParams["USE_SHARE"] == "Y")
+	{
+		?>
+		<div class="news-detail-share">
+			<noindex>
+			<?
+			$APPLICATION->IncludeComponent("bitrix:main.share", "", array(
+					"HANDLERS" => $arParams["SHARE_HANDLERS"],
+					"PAGE_URL" => $arResult["~DETAIL_PAGE_URL"],
+					"PAGE_TITLE" => $arResult["~NAME"],
+					"SHORTEN_URL_LOGIN" => $arParams["SHARE_SHORTEN_URL_LOGIN"],
+					"SHORTEN_URL_KEY" => $arParams["SHARE_SHORTEN_URL_KEY"],
+					"HIDE" => $arParams["SHARE_HIDE"],
+				),
+				$component,
+				array("HIDE_ICONS" => "Y")
+			);
+			?>
+			</noindex>
+		</div>
+		<?
+	}
+	?>
+</div>
+
+
+<script>
+   // window.oncontextmenu = function () {return false;}
+   // window.onkeydown = function () {return false;}
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -48,7 +48,8 @@ class Methods
                             "IBLOCK_ID" => 1,
                             "PROPERTY_VALUES" => $PROP,
                             "NAME" => $_POST['title'],
-                            "CODE" => md5('klyuchi-hash' . $userId . strtotime("now")),
+                            //"CODE" => md5('klyuchi-hash' . $userId . strtotime("now")),
+                            "CODE" => substr(str_shuffle(PERMITTED_CHARS), 0, 200),
                             "ACTIVE" => "Y",
                         ];
 
@@ -145,7 +146,7 @@ class Methods
                     }
 
                     // Выводим id обсуждения
-                     echo "discussion id: {$discussionId}";
+                    // echo "discussion id: {$discussionId}";
 
                 }
 
@@ -184,11 +185,14 @@ class Methods
                     self::updateElementRequestStatus($status, $idRequest);
 
                     // Выводим id обсуждения
-                    echo "discussion id: {$discussionId}";
+                    // echo "discussion id: {$discussionId}";
+                    return $discussionId;
                 }
 
                 $i++;
             }
+
+            return self::$discussionId;
         }
     }
 
@@ -263,7 +267,9 @@ class Methods
 
             $discussionId = $el->Update($idRequest, $arLoadProductArray);
 
-            echo 'update status: '. $discussionId .' status ' .$status;
+            // echo 'update status: '. $discussionId .' status ' .$status;
+
+            // echo self::$discussionId;
         }
 
     }
@@ -328,21 +334,24 @@ class Methods
                         if (empty(self::$discussionId)) {
                             $discussionId = $el->Add($arLoadDiscussionArray);
                             self::$discussionId = $discussionId;
+
                         } else {
                             if (!empty(self::$discussionId)) {
                                 $discussionId = $el->Update(self::$discussionId, $arLoadDiscussionArray);
                             }
                         }
                         // Выводим id обсуждения
-                        echo "el id: {$discussionId}";
+                        // echo "el id: {$discussionId}";
 
                     } else {
                         // Выводим ошибку
-                        echo "error: {$el->LAST_ERROR}";
+                        // echo "error: {$el->LAST_ERROR}";
                     }
 
                     $i++;
                 }
+
+                return self::$discussionId;
 
             }
 
@@ -400,9 +409,11 @@ class Methods
                             }
                         }
                         // Выводим id обсуждения
-                        echo "el id: {$discussionId}";
+                        // echo "el id: {$discussionId}";
 
-                    } else {
+                    }
+
+                    else {
 
                         $PROP = [];
 
@@ -435,12 +446,16 @@ class Methods
 
                         $discussionId = $el->Add($arLoadDiscussionArray);
 
+                        //echo $discussionId;
+
                         // Выводим id обсуждения
-                        echo "el id: {$discussionId}";
+                        // echo "el id: {$discussionId}";
                     }
 
                     $i++;
                 }
+
+                return $discussionId;
             }
         }
     }
@@ -515,7 +530,7 @@ class Methods
                     $discussion = $el->Update($idRequest, $arLoadProductArray);
 
                     // Выводим id обсуждения
-                    echo "id: " . $discussion . "<br>";
+                    // echo "id: " . $discussion . "<br>";
 
 
                 // Если нету файлов для перевода
@@ -553,7 +568,7 @@ class Methods
                     $discussion = $el->Update($idRequest, $arLoadProductArray);
 
                     // Выводим id обсуждения
-                    echo "id: " . $discussion . "<br>";
+                    // echo "id: " . $discussion . "<br>";
                 }
 
                 $i++;

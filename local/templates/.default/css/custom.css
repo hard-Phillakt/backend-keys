@@ -1,8 +1,15 @@
 
+
+
+
+
 #keys-translr .keys-translr__box_sidebar {
     top: 0;
 }
 
+.form-group__translate-create-link {
+    display: none;
+}
 
 /* Навигация в сайдбаре */
 
@@ -48,8 +55,6 @@ div.modern-page-navigation {
 
 /* Пагинация end */
 
-
-
 /* */
 
 .status-str__success {
@@ -67,7 +72,7 @@ div.modern-page-navigation {
 }
 
 .alertify-notifier .ajs-message.ajs-success {
-    background: rgba(91,189,114,.95);
+    background: rgba(91, 189, 114, .95);
     color: #fff;
     font-size: 16px;
     display: flex;
@@ -77,11 +82,93 @@ div.modern-page-navigation {
 }
 
 .alertify-notifier .ajs-message.ajs-error {
-    background: rgba(217,92,92,.95);
+    background: rgba(217, 92, 92, .95);
     color: #fff;
     font-size: 16px;
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
+}
+
+.alertify-notifier .ajs-message.ajs-visible {
+    background: #428dff;
+    color: #fff;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.keys-translr__box-canvas-wrap {
+    display: flex;
+    justify-content: center;
+}
+
+#screen {
+    outline-offset: -2px;
+    text-decoration: none;
+    color: #fff;
+    outline-color: #3756b4;
+}
+
+#keys-translr-2 .keys-translr__box-canvas__toggle {
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(66, 141, 255, .3215686274509804);
+    padding: 15px 0 9px;
+}
+
+#keys-translr-2 .keys-translr__box-canvas__toggle-prev, #keys-translr-2 .keys-translr__box-canvas__toggle-next {
+    position: relative;
+    height: 40px;
+    width: 40px;
+    background: #000;
+    display: inline-flex;
+    border-radius: 3em;
+    background: #428dff;
+    transition: all .3s ease-in-out;
+    border: 3px solid #428dff;
+}
+
+#keys-translr-2 .keys-translr__box-canvas__toggle-prev:before {
+    content: "";
+    position: absolute;
+    top: 12px;
+    left: 15px;
+    border-top: 1px solid #fff;
+    border-right: 1px solid #fff;
+    width: 10px;
+    height: 10px;
+    transform: rotate(225deg);
+}
+
+#keys-translr-2 .keys-translr__box-canvas__toggle-next:before {
+    content: "";
+    position: absolute;
+    top: 12px;
+    left: 10px;
+    border-top: 1px solid #fff;
+    border-right: 1px solid #fff;
+    width: 10px;
+    height: 10px;
+    transform: rotate(45deg);
+}
+
+#keys-translr .keys-translr__auth_form label.error {
+    margin-bottom: 5px;
+}
+
+#keys-translr .keys-translr__auth_form label.error {
+    margin-bottom: 5px;
+}
+
+.page-not-found {
+    display: grid;
+    place-content: center;
+    height: 100vh;
 }

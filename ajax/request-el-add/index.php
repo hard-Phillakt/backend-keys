@@ -22,7 +22,7 @@
  //var_dump($_POST);
  //var_dump($_FILES);
 
-if(count($_FILES['upfiles']['name']) > 1){
+if(!empty($_FILES['upfiles']['name'])){
     $arrParam[] = count($_FILES['upfiles']['name']);
     $arrParam[] = $_POST['userId'];
 
