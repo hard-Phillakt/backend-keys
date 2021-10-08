@@ -1,0 +1,11 @@
+/bitrix
+/local/php_interface/vendor
+/upload
+
+.htaccess
+README.md
+*_.php
+*_.html
+*_.css
+*_.js
+*_.json

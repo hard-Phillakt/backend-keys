@@ -1,0 +1,317 @@
+
+.banner-alert {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: #4279fff7;
+    z-index: 9999;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 21px;
+    /*height: 100vh;*/
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+#keys-translr .keys-translr__box_sidebar {
+    top: 0;
+}
+
+.form-group__translate-create-link {
+    display: none;
+}
+
+/* Навигация в сайдбаре */
+
+#keys-translr .keys-translr__box-nav-box-login:before {
+    background: url(/local/templates/.default/img/icons/login.svg);
+    background-repeat: no-repeat;
+    background-position: 50%;
+}
+
+#keys-translr .keys-translr__box-nav-box-settings:before {
+    background: url(/local/templates/.default/img/icons/settings.svg);
+    background-repeat: no-repeat;
+    background-position: 50%;
+}
+
+#keys-translr .keys-translr__box-nav-box-prompt {
+    text-decoration: underline;
+    position: relative;
+    transition: all .3s ease-in-out;
+}
+
+#keys-translr .keys-translr__box-nav-box-prompt:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -30px;
+    width: 20px;
+    height: 20px;
+    background: url(/local/templates/.default/img/icons/prompt.svg);
+    background-repeat: no-repeat;
+    background-position: 50%;
+}
+
+#keys-translr .keys-translr__box-nav-box-prompt:hover {
+    text-decoration: none;
+    color: #a9b6e6;
+}
+
+#keys-translr .keys-translr__box-nav-box-logout:before {
+    background: url(/local/templates/.default/img/icons/logout.svg);
+    background-repeat: no-repeat;
+    background-position: 50%;
+}
+
+
+.status-str__default {
+    color: #989898;
+}
+
+/* Навигация в сайдбаре end */
+
+/* Пагинация */
+
+div.modern-page-navigation a, span.modern-page-current, div.modern-page-navigation a.modern-page-previous, span.modern-page-dots {
+    border: none;
+    font-size: 16px;
+    color: #428dff;
+}
+
+.modern-page-navigation span.modern-page-current {
+    color: #000;
+}
+
+div.modern-page-navigation {
+    padding: 0;
+}
+
+.modern-page-navigation .modern-page-previous, .modern-page-navigation .modern-page-next {
+    padding: 0;
+}
+
+/* Пагинация end */
+
+/* */
+
+.status-str__success {
+    color: #1AD163;
+}
+
+#keys-translr label.error {
+    background: #ff424de6;
+    font-size: 11px;
+    display: inline-flex;
+    color: #fff;
+    padding: 3px 15px;
+    border-radius: 0.3em;
+    margin: 5px 0 0 0;
+}
+
+.alertify-notifier .ajs-message.ajs-success {
+    background: rgba(91, 189, 114, .95) !important;
+    color: #fff;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.alertify-notifier .ajs-message.ajs-error {
+    background: rgba(217, 92, 92, .95) !important;
+    color: #fff;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.alertify-notifier .ajs-message.ajs-visible {
+    background: #428dff;
+    color: #fff;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.keys-translr__box-canvas-wrap {
+    display: flex;
+    justify-content: center;
+}
+
+#screen {
+    outline-offset: -2px;
+    text-decoration: none;
+    color: #fff;
+    outline-color: #3756b4;
+}
+
+#keys-translr-2 .keys-translr__box-canvas__toggle {
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(66, 141, 255, .3215686274509804);
+    padding: 15px 0 9px;
+}
+
+#keys-translr-2 .keys-translr__box-canvas__toggle-prev, #keys-translr-2 .keys-translr__box-canvas__toggle-next {
+    position: relative;
+    height: 40px;
+    width: 40px;
+    background: #000;
+    display: inline-flex;
+    border-radius: 3em;
+    background: #428dff;
+    transition: all .3s ease-in-out;
+    border: 3px solid #428dff;
+}
+
+#keys-translr-2 .keys-translr__box-canvas__toggle-prev:before {
+    content: "";
+    position: absolute;
+    top: 12px;
+    left: 15px;
+    border-top: 1px solid #fff;
+    border-right: 1px solid #fff;
+    width: 10px;
+    height: 10px;
+    transform: rotate(225deg);
+}
+
+#keys-translr-2 .keys-translr__box-canvas__toggle-next:before {
+    content: "";
+    position: absolute;
+    top: 12px;
+    left: 10px;
+    border-top: 1px solid #fff;
+    border-right: 1px solid #fff;
+    width: 10px;
+    height: 10px;
+    transform: rotate(45deg);
+}
+
+#keys-translr .keys-translr__auth_form label.error {
+    margin-bottom: 5px;
+}
+
+#keys-translr .keys-translr__auth_form label.error {
+    margin-bottom: 5px;
+}
+
+.page-not-found {
+    display: grid;
+    place-content: center;
+    height: 100vh;
+}
+
+
+/* Custom select */
+
+
+.custom-select {
+    position: relative;
+    font-size: 16px;
+    max-width: 300px;
+}
+
+.custom-select select {
+    opacity: 0;
+    visibility: hidden;
+    display: none;
+}
+
+.select-selected {
+    background-color: #fff;
+    border-radius: 4px;
+}
+
+
+.select-selected:after {
+    position: absolute;
+    content: "";
+    top: 14px;
+    right: 10px;
+    width: 0;
+    height: 0;
+    border: 6px solid transparent;
+    border-color: #ced4da transparent transparent transparent;
+}
+
+.select-selected.select-arrow-active:after {
+    border-color: transparent transparent #ced4da transparent;
+    top: 7px;
+}
+
+.select-items div, .select-selected {
+    color: #000;
+    padding: 8px 16px;
+    border: 1px solid #ced4da;
+    cursor: pointer;
+    user-select: none;
+}
+
+.select-items {
+    position: absolute;
+    background-color: #f8f9fa;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    border-radius: 4px;
+}
+
+.select-items * {
+    transition: all .3s ease-in-out;
+}
+
+.select-items div:first-child {
+    border-top: 0;
+    border-bottom: 1px solid #ced4da;
+}
+
+.select-items div:last-child {
+    border-top: 0;
+    border-radius: 0 0 4px 4px;
+}
+
+.select-hide {
+    display: none;
+}
+
+.select-items div:hover, .same-as-selected {
+    background-color: #ced4da73;
+}
+
+.rem-user-from-request {
+    cursor: pointer;
+    width: 23px;
+    height: 23px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: #ff424d;
+    background: #fff;
+    border-radius: 1em;
+    transition: all .3s ease-in-out;
+}
+
+.rem-user-from-request:hover {
+    background: #ff424d;
+    color: #fff;
+    border: 1px solid #ff424d7a;
+}

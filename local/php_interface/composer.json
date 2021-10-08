@@ -1,0 +1,13 @@
+{
+  "autoload": {
+    "psr-4": {
+      "src\\": "src/"
+    }
+  },
+  "require-dev": {
+    "symfony/var-dumper": "^4.4"
+  },
+  "require": {
+    "rakit/validation": "^1.4"
+  }
+}
